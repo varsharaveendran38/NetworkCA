@@ -10,22 +10,28 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 038462771019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
+      - echo "Login successful"  # Debugging line to confirm login success
       - export REPO_URI=0384-6277-1019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
       - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo "Repository URI: $REPO_URI"  # Debugging line to print REPO_URI
+      - echo "Image tag: $IMAGE_TAG"  # Debugging line to print IMAGE_TAG
 
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $REPO_URI:$IMAGE_TAG .
-      - docker tag $REPO_URI:$IMAGE_TAG $REPO_URI:latest
+      - docker build -t $REPO_URI:$IMAGE_TAG .  # Building image
+      - docker tag $REPO_URI:$IMAGE_TAG $REPO_URI:latest  # Tagging as latest
+      - echo "Docker images before push:"  # Debugging line to list images
+      - docker images  # Listing Docker images to confirm the image was built
 
   post_build:
     commands:
       - echo Pushing the Docker image...
-      - docker push $REPO_URI:$IMAGE_TAG
-      - docker push $REPO_URI:latest
+      - echo "Pushing image with tag: $IMAGE_TAG"  # Debugging line to confirm the image tag being pushed
+      - docker push $REPO_URI:$IMAGE_TAG  # Pushing the image with the commit hash tag
+      - docker push $REPO_URI:latest  # Pushing the image with the 'latest' tag
+      - echo "Docker push completed"  # Debugging line to confirm push completion
       - echo Build complete.
 
 artifacts:
   files: '**/*'
-
