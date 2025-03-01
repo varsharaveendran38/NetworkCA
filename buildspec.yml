@@ -1,12 +1,17 @@
 version: 0.2
 
+env:
+  exported-variables:
+    - REPO_URI
+    - IMAGE_TAG
+
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 0384-6277-1019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
-      - REPO_URI=0384-6277-1019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 038462771019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
+      - export REPO_URI=0384-6277-1019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
+      - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 
   build:
     commands:
