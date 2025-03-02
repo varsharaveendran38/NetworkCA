@@ -5,19 +5,10 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 038462771019.dkr.ecr.eu-west-1.amazonaws.com
       - REPO_URI=038462771019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
-      - IMAGE_TAG=IMAGE_TAG=20250302145926
-
+      
   build:
     commands:
       - echo Building Docker image...
       - docker build -t $REPO_URI:latest .
       - docker push $REPO_URI:latest
-   post_build:
-    commands:
-      - echo Pushing the Docker image...
-      - docker push $REPO_URI:$IMAGE_TAG
-      - docker push $REPO_URI:latest
-artifacts:
-  files:
-    - '**/*'
-  name: sBlfa4Q
+ 
