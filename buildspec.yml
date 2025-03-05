@@ -1,25 +1,31 @@
 version: 0.2
+
 phases:
+  install:
+    commands:
+      - echo "Installing dependencies..."
+      - apt-get update -y
+      - apt-get install -y jq  # Example: Installing jq
+
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 038462771019.dkr.ecr.eu-west-1.amazonaws.com
-      - REPO_URI=038462771019.dkr.ecr.eu-west-1.amazonaws.com/networkapp
-      
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account-id>.dkr.ecr.<region>.amazonaws.com
+      - export REPO_URI=<account-id>.dkr.ecr.<region>.amazonaws.com/<repository-name>
+
   build:
     commands:
-      - echo Building Docker image...
+      - echo "Building Docker image..."
       - docker build -t $REPO_URI:latest .
+      - echo "Pushing image to ECR..."
       - docker push $REPO_URI:latest
+
   post_build:
     commands:
-      - echo "Pushing Docker image to ECR"
-      - docker push 038462771019.dkr.ecr.eu-west-1.amazonaws.com/networkapp:latest
-      - echo "Saving build artifacts"
+      - echo "Saving build artifacts..."
       - mkdir -p WebappPipeline/BuildArtif
       - echo "Build successful" > WebappPipeline/BuildArtif/build_info.txt
 
 artifacts:
   files:
-    - "WebappPipeline/BuildArtif/"
- 
+    - "WebappPipeline/BuildArtif/*"
