@@ -11,6 +11,6 @@ hooks:
       runas: ubuntu
 
   AfterInstall:
-    - location: scripts/start_docker.sh
+    - location: scripts/deploy.sh
       timeout: 300
       runas: ubuntu
