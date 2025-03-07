@@ -3,9 +3,14 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/app
+
 hooks:
+  BeforeInstall:
+    - location: scripts/stop_docker.sh
+      timeout: 300
+      runas: ubuntu
+
   AfterInstall:
     - location: scripts/start_docker.sh
       timeout: 300
       runas: ubuntu
-
