@@ -25,6 +25,15 @@ phases:
       - echo "Saving build artifacts..."
       - mkdir -p WebappPipeline/BuildArtif
       - echo "Build successful" > WebappPipeline/BuildArtif/build_info.txt
+      
+      # Deployment on EC2
+      - echo "Deploying application on EC2..."
+      - ssh -o StrictHostKeyChecking=no ec2-user@34.245.203.225 <<EOF
+          docker pull $REPO_URI:latest
+          docker stop my-app-container || true
+          docker rm my-app-container || true
+          docker run -d --name my-running-app -p 8080:80 $REPO_URI:latest
+        EOF
 
 artifacts:
   files:
