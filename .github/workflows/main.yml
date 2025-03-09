@@ -38,11 +38,11 @@ jobs:
         chmod 600 mykey.pem
 
         # Sync the updated files from GitHub to EC2 instance
-        scp -i mykey.pem -o StrictHostKeyChecking=no -r ./Docker ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
+        scp -i mykey.pem -o StrictHostKeyChecking=no -r . ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
 
         ssh -i mykey.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
           # Navigate to the updated directory inside EC2
-          cd /home/ubuntu/app/Docker
+          cd /home/ubuntu/app
 
           # Stop and remove the existing Docker container
           docker stop myapp || true
