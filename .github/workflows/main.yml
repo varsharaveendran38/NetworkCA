@@ -21,8 +21,10 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/app:myapp
-        docker push ${{ secrets.DOCKER_USERNAME }}/app:myapp
+        docker build -t ${{ secrets.DOCKER_USERNAME }} ***/app:myapp .
+
+        docker push ${{ secrets.DOCKER_USERNAME }} ***/app:myapp .
+
         
   deploy:
     runs-on: ubuntu-latest
