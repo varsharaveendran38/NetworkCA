@@ -30,33 +30,35 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          chmod 600 ~/.ssh/my-key.pem
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
       - name: Set up SSH connection and deploy to EC2
         run: |
-          # Ensure the SSH key has the correct permissions
-          chmod 600 ~/.ssh/my-key.pem
-
           # Debug: Check if the key exists
           ls -l ~/.ssh/my-key.pem
-
           # Sync the updated files from GitHub to EC2 instance
           scp -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no -r . ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
-
           ssh -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             # Navigate to the updated directory inside EC2
             cd /home/ubuntu/app
-
             # Stop and remove the existing Docker container
             docker stop myapp || true
             docker rm myapp || true
-
             # Remove old Docker image
             docker rmi ${{ secrets.DOCKER_USERNAME }}/myapp:latest || true
-
             # Pull the latest Docker image from Docker Hub
             docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-
             # Run the updated Docker container
             docker run -d -p 80:80 --name myapp ${{ secrets.DOCKER_USERNAME }}/myapp:latest
           EOF
