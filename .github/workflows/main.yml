@@ -38,17 +38,23 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
           chmod 600 ~/.ssh/my-key.pem
 
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.EC2_PRIVATE_KEY }}
-
-      - name: Set up SSH connection and deploy to EC2
+      - name: Test SSH connection
         run: |
-          # Debug: Check if the key exists
-          ls -l ~/.ssh/my-key.pem
-          # Sync the updated files from GitHub to EC2 instance
-          scp -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no -r . ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
+          ssh -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "echo 'SSH connection successful!'"
+
+      - name: Set permissions for the deployment directory
+        run: |
+          ssh -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/app/
+            sudo chmod -R 755 /home/ubuntu/app/
+          EOF
+
+      - name: Sync files to EC2 instance using rsync
+        run: |
+          rsync -avz --exclude='.git' -e "ssh -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
+
+      - name: Deploy to EC2
+        run: |
           ssh -i ~/.ssh/my-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             # Navigate to the updated directory inside EC2
             cd /home/ubuntu/app
